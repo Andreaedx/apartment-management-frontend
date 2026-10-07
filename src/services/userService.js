@@ -1,0 +1,39 @@
+import api from "./api";
+
+export const getProfile = async () => {
+  return api.get("/api/users/profile");
+};
+
+export const uploadProfilePicture = async (formData) => {
+  return api.post("/api/users/profile-picture", formData);
+};
+
+export const updateProfile = async (data) => {
+  return api.patch("/api/users/profile", data);
+};
+
+export const changePassword = async (data) => {
+  return api.patch("/api/users/password", data);
+};
+
+export const deleteAccount = async () => {
+  return api.delete("/api/users/delete");
+};
+
+// Admin user management
+
+export const getUsers = async () => {
+  return api.get("/api/users");
+};
+
+export const getUserById = async (id) => {
+  return api.get(`/api/users/${id}`);
+};
+
+export const updateUser = async (id, data) => {
+  return api.patch(`/api/users/${id}`, data);
+};
+
+export const deleteUser = async (id) => {
+  return api.delete(`/api/users/${id}`);
+};
