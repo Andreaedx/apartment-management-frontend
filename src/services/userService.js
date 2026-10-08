@@ -37,3 +37,17 @@ export const updateUser = async (id, data) => {
 export const deleteUser = async (id) => {
   return api.delete(`/api/users/${id}`);
 };
+
+// Admin manager-request review
+
+export const getManagerRequests = async (status = "PENDING") => {
+  return api.get("/api/users/manager-requests", {
+    params: { status },
+  });
+};
+
+export const reviewManagerRequest = async (id, action) => {
+  return api.patch(`/api/users/${id}/manager-request`, {
+    action,
+  });
+};

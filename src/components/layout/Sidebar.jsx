@@ -82,6 +82,11 @@ const Sidebar = ({ onClose }) => {
       icon: "👥",
     },
     {
+      label: "Manager Requests",
+      path: "/manager-requests",
+      icon: "📝",
+    },
+    {
       label: "Properties",
       path: "/properties",
       icon: "🏗️",

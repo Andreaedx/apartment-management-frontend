@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { resetPassword } from "../../services/authService";
+import AuthLayout from "../../components/layout/AuthLayout";
 
 const ResetPassword = () => {
   const { token } = useParams();
-  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     newPassword: "",
@@ -78,80 +78,88 @@ const ResetPassword = () => {
   };
 
   return (
-    <div>
-      <h1>Reset Password</h1>
-
-      <p>Enter your new password below.</p>
-
+    <AuthLayout
+      title={message ? "Password updated" : "Set a new password"}
+      subtitle={
+        message
+          ? "You can now log in with your new password."
+          : "Choose a new password for your account."
+      }
+    >
       {error && (
-        <p style={{ color: "red" }}>
+        <p className="auth-alert auth-alert-error" role="alert">
           {error}
         </p>
       )}
 
       {message && (
-        <div>
-          <p style={{ color: "green" }}>
+        <>
+          <p className="auth-alert auth-alert-success" role="status">
             {message}
           </p>
 
-          <Link to="/login">
-            Go to Login
+          <Link className="auth-submit auth-button-link" to="/login">
+            Go to login
           </Link>
-        </div>
+        </>
       )}
 
       {!message && (
-        <form onSubmit={handleSubmit}>
-          <div>
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="auth-field">
             <label htmlFor="newPassword">
-              New Password
+              New password
             </label>
 
             <input
               id="newPassword"
               name="newPassword"
               type="password"
+              autoComplete="new-password"
               value={formData.newPassword}
               onChange={handleChange}
-              placeholder="Enter new password"
+              placeholder="At least 6 characters"
               minLength={6}
               required
             />
           </div>
 
-          <div>
+          <div className="auth-field">
             <label htmlFor="confirmPassword">
-              Confirm Password
+              Confirm new password
             </label>
 
             <input
               id="confirmPassword"
               name="confirmPassword"
               type="password"
+              autoComplete="new-password"
               value={formData.confirmPassword}
               onChange={handleChange}
-              placeholder="Confirm new password"
               minLength={6}
               required
             />
           </div>
 
-          <button type="submit" disabled={loading}>
-            {loading ? "Resetting..." : "Reset Password"}
+          <button
+            className="auth-submit"
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? "Resetting..." : "Reset password"}
           </button>
         </form>
       )}
 
       {!message && (
-        <p>
+        <p className="auth-footer">
           Remember your password?{" "}
           <Link to="/login">
-            Login
+            Log in
           </Link>
         </p>
       )}
-    </div>
+    </AuthLayout>
   );
 };
 

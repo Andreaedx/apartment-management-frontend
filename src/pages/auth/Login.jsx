@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import AuthLayout from "../../components/layout/AuthLayout";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -29,12 +30,10 @@ const Login = () => {
     setError("");
 
     try {
-      const result = await login(
+      await login(
         formData.email,
         formData.password
       );
-
-      console.log("Logged in user:", result.user);
 
       navigate("/dashboard");
     } catch (error) {
@@ -47,17 +46,18 @@ const Login = () => {
   };
 
   return (
-    <div>
-      <h1>Login</h1>
-
+    <AuthLayout
+      title="Welcome back"
+      subtitle="Log in to your account to continue."
+    >
       {error && (
-        <p style={{ color: "red" }}>
+        <p className="auth-alert auth-alert-error" role="alert">
           {error}
         </p>
       )}
 
-      <form onSubmit={handleSubmit}>
-        <div>
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <div className="auth-field">
           <label htmlFor="email">
             Email
           </label>
@@ -66,45 +66,52 @@ const Login = () => {
             id="email"
             name="email"
             type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
             value={formData.email}
             onChange={handleChange}
             required
           />
         </div>
 
-        <div>
-          <label htmlFor="password">
-            Password
-          </label>
+        <div className="auth-field">
+          <div className="auth-field-row">
+            <label htmlFor="password">
+              Password
+            </label>
+
+            <Link className="auth-link-small" to="/forgot-password">
+              Forgot password?
+            </Link>
+          </div>
 
           <input
             id="password"
             name="password"
             type="password"
+            autoComplete="current-password"
             value={formData.password}
             onChange={handleChange}
             required
           />
         </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
+        <button
+          className="auth-submit"
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? "Logging in..." : "Log in"}
         </button>
       </form>
 
-      <p>
-        <Link to="/forgot-password">
-          Forgot password?
-        </Link>
-      </p>
-
-      <p>
+      <p className="auth-footer">
         Don't have an account?{" "}
         <Link to="/register">
-          Register
+          Create one
         </Link>
       </p>
-    </div>
+    </AuthLayout>
   );
 };
 
