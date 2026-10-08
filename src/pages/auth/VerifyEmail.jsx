@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { verifyEmail } from "../../services/authService";
+import AuthLayout from "../../components/layout/AuthLayout";
 
 const VerifyEmail = () => {
   const { token } = useParams();
@@ -39,35 +40,43 @@ const VerifyEmail = () => {
 
   if (loading) {
     return (
-      <div>
-        <h1>Verifying Email...</h1>
-        <p>Please wait while we verify your email address.</p>
-      </div>
+      <AuthLayout
+        title="Verifying your email"
+        subtitle="Please wait while we verify your email address."
+      >
+        <div className="auth-status" role="status">
+          <div className="auth-status-spinner" aria-hidden="true" />
+        </div>
+      </AuthLayout>
     );
   }
 
   return (
-    <div>
-      {message ? (
-        <>
-          <h1>Email Verified</h1>
-          <p>{message}</p>
+    <AuthLayout
+      title={message ? "Email verified" : "Verification failed"}
+    >
+      <div className="auth-status">
+        <div
+          className={`auth-status-icon ${
+            message ? "auth-status-success" : "auth-status-error"
+          }`}
+          aria-hidden="true"
+        >
+          {message ? "✓" : "!"}
+        </div>
 
-          <Link to="/login">
-            Go to Login
-          </Link>
-        </>
-      ) : (
-        <>
-          <h1>Verification Failed</h1>
-          <p style={{ color: "red" }}>{error}</p>
+        <p
+          className="auth-status-text"
+          role={message ? "status" : "alert"}
+        >
+          {message || error}
+        </p>
+      </div>
 
-          <Link to="/login">
-            Back to Login
-          </Link>
-        </>
-      )}
-    </div>
+      <Link className="auth-submit auth-button-link" to="/login">
+        {message ? "Go to login" : "Back to login"}
+      </Link>
+    </AuthLayout>
   );
 };
 
