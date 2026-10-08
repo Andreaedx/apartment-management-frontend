@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { resetPassword } from "../../services/authService";
 
 const ResetPassword = () => {
   const { token } = useParams();
-  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     newPassword: "",
