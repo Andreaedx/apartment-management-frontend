@@ -9,6 +9,7 @@ const Register = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    accountType: "tenant",
   });
 
   const [error, setError] = useState("");
@@ -58,6 +59,7 @@ const Register = () => {
         name: formData.name,
         email: formData.email,
         password: formData.password,
+        accountType: formData.accountType,
       });
 
       setMessage(
@@ -71,6 +73,7 @@ const Register = () => {
         email: "",
         password: "",
         confirmPassword: "",
+        accountType: "tenant",
       });
     } catch (error) {
       const errorMessage =
@@ -100,6 +103,40 @@ const Register = () => {
       )}
 
       <form onSubmit={handleSubmit}>
+        <fieldset>
+          <legend>I am registering as</legend>
+
+          <label>
+            <input
+              type="radio"
+              name="accountType"
+              value="tenant"
+              checked={formData.accountType === "tenant"}
+              onChange={handleChange}
+            />
+            {" "}A tenant
+          </label>
+
+          <label style={{ marginLeft: "16px" }}>
+            <input
+              type="radio"
+              name="accountType"
+              value="manager"
+              checked={formData.accountType === "manager"}
+              onChange={handleChange}
+            />
+            {" "}A property manager
+          </label>
+
+          {formData.accountType === "manager" && (
+            <p style={{ fontSize: "13px", marginTop: "6px" }}>
+              Manager accounts need admin approval. You can log in
+              after verifying your email, and you'll get manager
+              access once an admin approves your request.
+            </p>
+          )}
+        </fieldset>
+
         <div>
           <label htmlFor="name">Full Name</label>
 

@@ -12,6 +12,7 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 
 import Dashboard from "../pages/Dashboard";
+import ManagerRequests from "../pages/admin/ManagerRequests";
 
 import ProtectedRoute from "./ProtectedRoute";
 import DashboardLayout from "../components/layout/DashboardLayout";
@@ -54,6 +55,11 @@ const AppRoutes = () => {
             <Route
               path="/dashboard"
               element={<Dashboard />}
+            />
+
+            <Route
+              path="/manager-requests"
+              element={<ManagerRequests />}
             />
           </Route>
         </Route>

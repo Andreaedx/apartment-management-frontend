@@ -937,3 +937,66 @@ code {
     padding: 20px 16px;
   }
 }
+/* =========================================
+   MANAGER REQUESTS
+========================================= */
+
+.manager-request-notice {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-size: 14px;
+}
+
+.manager-request-notice-rejected {
+  border-color: rgba(220, 38, 38, 0.4);
+  background: rgba(220, 38, 38, 0.08);
+}
+
+.manager-requests-message,
+.manager-requests-error {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.manager-requests-message {
+  color: #16a34a;
+}
+
+.manager-requests-error {
+  color: #dc2626;
+}
+
+.manager-requests-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.manager-requests-approve,
+.manager-requests-reject {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.manager-requests-approve {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.manager-requests-reject {
+  background: var(--bg);
+  color: #dc2626;
+}
+
+.manager-requests-approve:disabled,
+.manager-requests-reject:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
