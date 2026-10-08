@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
         const response = await getProfile();
 
         setUser(response.data.user);
-      } catch (error) {
+      } catch {
         try {
           // Access token may have expired.
           // Try getting a new one using the HTTP-only refresh cookie.
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
           const profileResponse = await getProfile();
 
           setUser(profileResponse.data.user);
-        } catch (refreshError) {
+        } catch {
           // Refresh token is invalid/expired.
           // Log the user out locally.
           localStorage.removeItem("accessToken");
@@ -162,7 +162,9 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Custom hook
+// Custom hook. Kept next to the provider so existing imports keep working;
+// the rule only affects hot reload of this file during development.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
 

@@ -63,27 +63,20 @@ const Dashboard = () => {
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-  setLoading(true);
-  setError("");
+        setLoading(true);
+        setError("");
 
-  const data = await getDashboardData(user?.role);
+        const data = await getDashboardData(user?.role);
 
-  setDashboard(data);
-} catch (error) {
-  console.error("DASHBOARD ERROR:", error);
-  console.error("STATUS:", error.response?.status);
-  console.error("URL:", error.config?.url);
-  console.error("RESPONSE:", error.response?.data);
-
-  setError(
-    error.response?.data?.message ||
-      `Dashboard request failed: ${
-        error.config?.url || "unknown endpoint"
-      }`
-  );
-} finally {
-  setLoading(false);
-}
+        setDashboard(data);
+      } catch (error) {
+        setError(
+          error.response?.data?.message ||
+            "Unable to load dashboard data. Please try again."
+        );
+      } finally {
+        setLoading(false);
+      }
     };
 
     if (user?.role) {
