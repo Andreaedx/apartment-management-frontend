@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { verifyEmail } from "../../services/authService";
 import AuthLayout from "../../components/layout/AuthLayout";
+import "./Auth.css";
 
 const VerifyEmail = () => {
   const { token } = useParams();

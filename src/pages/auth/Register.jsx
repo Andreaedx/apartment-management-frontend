@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { register } from "../../services/authService";
 import AuthLayout from "../../components/layout/AuthLayout";
+import "./Auth.css";
 
 const Register = () => {
 

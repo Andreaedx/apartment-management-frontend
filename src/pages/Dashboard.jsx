@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getDashboardData } from "../services/dashboardService";
+import "./Dashboard.css";
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat("en-NG", {

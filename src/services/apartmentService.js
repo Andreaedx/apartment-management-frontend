@@ -1,7 +1,9 @@
 import api from "./api";
 
-export const getApartments = async () => {
-  return api.get("/api/apartments");
+export const getApartments = async (params = {}) => {
+  return api.get("/api/apartments", {
+    params,
+  });
 };
 
 export const getApartmentById = async (id) => {

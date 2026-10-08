@@ -1,0 +1,377 @@
+.public-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  color: #172033;
+}
+
+.public-navbar {
+  height: 72px;
+  padding: 0 7%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.public-logo {
+  color: #111827;
+  text-decoration: none;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.public-navbar nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.public-nav-link {
+  color: #374151;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 10px 16px;
+}
+
+.public-nav-button,
+.hero-button {
+  background: #111827;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 11px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.public-hero {
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  padding: 80px 7%;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(15, 23, 42, 0.96),
+      rgba(15, 23, 42, 0.7)
+    ),
+    url("https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=80")
+      center / cover;
+  color: white;
+}
+
+.public-hero-content {
+  max-width: 650px;
+}
+
+.hero-label,
+.section-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.public-hero h1 {
+  margin: 14px 0;
+  font-size: clamp(42px, 6vw, 72px);
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+.public-hero p {
+  max-width: 560px;
+  font-size: 18px;
+  line-height: 1.7;
+  margin-bottom: 30px;
+  opacity: 0.9;
+}
+
+.public-properties,
+.property-details-page {
+  width: min(1200px, 86%);
+  margin: 0 auto;
+  padding: 80px 0;
+}
+
+.public-section-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 35px;
+}
+
+.public-section-header h2 {
+  margin: 8px 0 0;
+  font-size: 34px;
+}
+
+.public-section-header > p {
+  max-width: 400px;
+  color: #64748b;
+  line-height: 1.7;
+}
+
+.property-grid,
+.apartment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.public-property-card,
+.public-apartment-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(15, 23, 42, 0.05);
+}
+
+.public-property-card {
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.public-property-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1);
+}
+
+.property-image,
+.apartment-image {
+  height: 230px;
+  overflow: hidden;
+  background: #e5e7eb;
+}
+
+.property-image img,
+.apartment-image img,
+.property-details-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.no-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  background: #e2e8f0;
+}
+
+.property-card-content,
+.apartment-card-content {
+  padding: 22px;
+}
+
+.property-card-content h3,
+.apartment-card-content h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.property-location {
+  color: #475569;
+  font-weight: 600;
+  margin: 5px 0;
+}
+
+.property-address {
+  color: #64748b;
+  margin: 5px 0;
+}
+
+.property-description,
+.apartment-description {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.view-property {
+  display: inline-block;
+  margin-top: 15px;
+  font-weight: 700;
+}
+
+.public-message,
+.public-error,
+.public-loading {
+  padding: 40px;
+  text-align: center;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.public-error {
+  color: #b91c1c;
+}
+
+.public-footer {
+  padding: 40px 7%;
+  background: #111827;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 30px;
+  color: #475569;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.property-details {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 45px;
+  margin-bottom: 80px;
+}
+
+.property-details-image {
+  height: 480px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #e2e8f0;
+}
+
+.property-details-content {
+  padding: 30px 0;
+}
+
+.property-details-content h1 {
+  font-size: 48px;
+  margin: 12px 0;
+}
+
+.property-about {
+  margin-top: 35px;
+}
+
+.property-about p {
+  color: #64748b;
+  line-height: 1.8;
+}
+
+.apartment-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  align-items: flex-start;
+}
+
+.apartment-status {
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.apartment-status.vacant {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.apartment-status.occupied {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.apartment-status.maintenance {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.apartment-type {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.apartment-price {
+  margin-top: 20px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.apartment-price span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.public-error-page {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .property-grid,
+  .apartment-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .property-details {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .public-navbar {
+    padding: 0 5%;
+  }
+
+  .public-navbar nav {
+    gap: 2px;
+  }
+
+  .public-nav-link,
+  .public-nav-button {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .public-hero {
+    padding: 60px 5%;
+  }
+
+  .public-properties,
+  .property-details-page {
+    width: 90%;
+    padding: 55px 0;
+  }
+
+  .public-section-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .property-grid,
+  .apartment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .property-details-image {
+    height: 300px;
+  }
+
+  .property-details-content h1 {
+    font-size: 36px;
+  }
+
+  .public-footer {
+    flex-direction: column;
+  }
+}
