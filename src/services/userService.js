@@ -22,8 +22,9 @@ export const deleteAccount = async () => {
 
 // Admin user management
 
-export const getUsers = async () => {
-  return api.get("/api/users");
+// params: { page, limit } (limit max 100)
+export const getUsers = async (params = {}) => {
+  return api.get("/api/users", { params });
 };
 
 // Verified tenants (manager/admin), used when creating a tenancy

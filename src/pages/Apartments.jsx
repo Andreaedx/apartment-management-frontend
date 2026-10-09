@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import PageHeader from "../components/common/PageHeader";
 import Modal from "../components/common/Modal";
+import ImageFields from "../components/common/ImageFields";
 import { useAuth } from "../context/AuthContext";
 import { getProperties } from "../services/propertyService";
 import {
@@ -8,6 +9,8 @@ import {
   createApartment,
   updateApartment,
   deleteApartment,
+  addApartmentImages,
+  deleteApartmentImage,
 } from "../services/apartmentService";
 
 const emptyForm = {
@@ -29,6 +32,10 @@ const Apartments = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  // New image files chosen in the form, uploaded on save
+  const [files, setFiles] = useState([]);
+  // Errors from the form are shown inside the modal so they're visible
+  const [formError, setFormError] = useState("");
   // Bumped after a save or delete to fetch the list again
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -70,6 +77,8 @@ const Apartments = () => {
   const openCreate = () => {
     setEditing(null);
     setForm({...emptyForm, property: ownProperties[0]?._id || ""});
+    setFiles([]);
+    setFormError("");
     setShowForm(true);
   };
 
@@ -83,13 +92,24 @@ const Apartments = () => {
       status: apartment.status || "VACANT",
       description: apartment.description || "",
     });
+    setFiles([]);
+    setFormError("");
     setShowForm(true);
+  };
+
+  // Builds multipart data: the text fields (if any) plus the chosen images
+  const toFormData = (fields = {}) => {
+    const data = new FormData();
+    Object.entries(fields).forEach(([key, value]) => data.append(key, value));
+    files.forEach((file) => data.append("images", file));
+    return data;
   };
 
   const submit = async (e) => {
     e.preventDefault();
     try {
       setSaving(true);
+      setFormError("");
       if (editing) {
         await updateApartment(editing._id, {
           apartmentNumber: form.apartmentNumber,
@@ -98,24 +118,43 @@ const Apartments = () => {
           status: form.status,
           description: form.description,
         });
+        if (files.length > 0) {
+          await addApartmentImages(editing._id, toFormData());
+        }
       } else {
-        // Sent as JSON (no images here) so rentAmount stays a number;
-        // FormData would turn it into text and the API rejects it
-        await createApartment({
+        const fields = {
           property: form.property,
           apartmentNumber: form.apartmentNumber,
           type: form.type,
           rentAmount: Number(form.rentAmount),
           status: form.status,
           description: form.description,
-        });
+        };
+        // JSON when there are no images; with images it must be multipart
+        // (the API converts the rent back to a number)
+        await createApartment(files.length > 0 ? toFormData(fields) : fields);
       }
       setShowForm(false);
       reload();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to save apartment.");
+      setFormError(err.response?.data?.message || "Failed to save apartment.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Removing a saved image takes effect immediately
+  const removeImage = async (imageId) => {
+    try {
+      setFormError("");
+      await deleteApartmentImage(editing._id, imageId);
+      setEditing((current) => ({
+        ...current,
+        images: current.images.filter((image) => image._id !== imageId),
+      }));
+      reload();
+    } catch (err) {
+      setFormError(err.response?.data?.message || "Failed to remove image.");
     }
   };
 
@@ -164,6 +203,7 @@ const Apartments = () => {
       {showForm && (
         <Modal title={editing ? "Edit Apartment" : "Add Apartment"} onClose={() => setShowForm(false)}>
           <form className="form-grid" onSubmit={submit}>
+            {formError && <div className="alert error full">{formError}</div>}
             {!editing && (
               <label>Property
                 <select required value={form.property} onChange={(e) => setForm({...form, property: e.target.value})}>
@@ -181,6 +221,7 @@ const Apartments = () => {
               {["VACANT","OCCUPIED","MAINTENANCE"].map((x) => <option key={x}>{x}</option>)}
             </select></label>
             <label className="full">Description<textarea rows="4" value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} /></label>
+            <ImageFields existing={editing?.images || []} onRemoveExisting={removeImage} files={files} onFilesChange={setFiles} />
             <div className="form-actions full"><button type="button" className="secondary-button" onClick={() => setShowForm(false)}>Cancel</button><button className="primary-button" disabled={saving}>{saving ? "Saving..." : "Save Apartment"}</button></div>
           </form>
         </Modal>

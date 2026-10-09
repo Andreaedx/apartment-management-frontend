@@ -22,6 +22,11 @@ export const deleteApartment = async (id) => {
   return api.delete(`/api/apartments/${id}`);
 };
 
+// formData with one or more "images" files
+export const addApartmentImages = async (id, formData) => {
+  return api.post(`/api/apartments/${id}/images`, formData);
+};
+
 export const deleteApartmentImage = async (
   apartmentId,
   imageId

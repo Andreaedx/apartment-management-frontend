@@ -20,6 +20,11 @@ export const deleteProperty = async (id) => {
   return api.delete(`/properties/${id}`);
 };
 
+// formData with one or more "images" files
+export const addPropertyImages = async (id, formData) => {
+  return api.post(`/properties/${id}/images`, formData);
+};
+
 export const deletePropertyImage = async (
   propertyId,
   imageId

@@ -8,6 +8,8 @@ import {
   deleteUser,
 } from "../services/userService";
 
+const PAGE_SIZE = 20;
+
 const Users = () => {
   const { user } = useAuth();
   const [users, setUsers] = useState([]);
@@ -18,6 +20,8 @@ const Users = () => {
   const [error, setError] = useState("");
   // Bumped after a save or delete to fetch the list again
   const [reloadKey, setReloadKey] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ total: 0, pages: 1 });
 
   const currentUserId = user?._id || user?.id;
 
@@ -26,9 +30,10 @@ const Users = () => {
 
     const load = async () => {
       try {
-        const response = await getUsers();
+        const response = await getUsers({ page, limit: PAGE_SIZE });
         if (cancelled) return;
         setUsers(response.data?.users || []);
+        setPagination(response.data?.pagination || { total: 0, pages: 1 });
         setError("");
       } catch (err) {
         if (!cancelled) setError(err.response?.data?.message || "Failed to load users.");
@@ -40,7 +45,12 @@ const Users = () => {
     load();
 
     return () => { cancelled = true; };
-  }, [reloadKey]);
+  }, [reloadKey, page]);
+
+  const goToPage = (next) => {
+    setLoading(true);
+    setPage(next);
+  };
 
   const reload = () => setReloadKey((key) => key + 1);
 
@@ -91,6 +101,15 @@ const Users = () => {
               </tr>
             ))}</tbody>
           </table></div>
+          <div className="pagination">
+            <span>
+              {pagination.total} user{pagination.total === 1 ? "" : "s"} · page {page} of {Math.max(pagination.pages, 1)}
+            </span>
+            <div className="pagination-buttons">
+              <button type="button" className="secondary-button" onClick={() => goToPage(page - 1)} disabled={page <= 1}>Previous</button>
+              <button type="button" className="secondary-button" onClick={() => goToPage(page + 1)} disabled={page >= pagination.pages}>Next</button>
+            </div>
+          </div>
         </div>
       )}
 
