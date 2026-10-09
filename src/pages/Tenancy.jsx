@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import PageHeader from "../components/common/PageHeader";
 import Modal from "../components/common/Modal";
 import { useAuth } from "../context/AuthContext";
-import { getUsers } from "../services/userService";
+import { getTenants } from "../services/userService";
 import { getApartments } from "../services/apartmentService";
 import {
   getTenancies,
@@ -22,32 +22,48 @@ const Tenancy = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  // Bumped after a save or end to fetch the list again
+  const [reloadKey, setReloadKey] = useState(0);
 
   const canManage = user?.role === "manager";
 
-  const load = async () => {
-    try {
-      setLoading(true);
-      const tenancyResponse = await getTenancies({ page: 1, limit: 100 });
-      setTenancies(tenancyResponse.data?.data || []);
+  useEffect(() => {
+    let cancelled = false;
 
-      if (canManage) {
-        const [usersResponse, apartmentResponse] = await Promise.all([
-          getUsers(),
-          getApartments(),
-        ]);
-        setTenants((usersResponse.data?.users || []).filter((u) => u.role === "tenant"));
-        setApartments(apartmentResponse.data?.data || []);
+    const load = async () => {
+      try {
+        const tenancyResponse = await getTenancies({ page: 1, limit: 100 });
+        if (cancelled) return;
+        setTenancies(tenancyResponse.data?.data || []);
+        setError("");
+      } catch (err) {
+        if (!cancelled) setError(err.response?.data?.message || "Failed to load tenancies.");
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setError("");
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to load tenancies.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => { load(); }, [canManage]);
+      // Form options are loaded separately so a failure here can't hide the list
+      if (canManage) {
+        try {
+          const [tenantsResponse, apartmentResponse] = await Promise.all([
+            getTenants(),
+            getApartments(),
+          ]);
+          if (cancelled) return;
+          setTenants(tenantsResponse.data?.users || []);
+          setApartments(apartmentResponse.data?.data || []);
+        } catch (err) {
+          if (!cancelled) setError(err.response?.data?.message || "Failed to load tenants and apartments.");
+        }
+      }
+    };
+
+    load();
+
+    return () => { cancelled = true; };
+  }, [canManage, reloadKey]);
+
+  const reload = () => setReloadKey((key) => key + 1);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -69,7 +85,7 @@ const Tenancy = () => {
         });
       }
       setShowForm(false);
-      await load();
+      reload();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to save tenancy.");
     } finally {
@@ -81,7 +97,7 @@ const Tenancy = () => {
     if (!window.confirm("End this tenancy?")) return;
     try {
       await endTenancy(id);
-      await load();
+      reload();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to end tenancy.");
     }
@@ -90,7 +106,7 @@ const Tenancy = () => {
   return (
     <div className="content-page">
       <PageHeader
-        title="Tenancy"
+        title={canManage ? "Tenancies" : "Tenancy"}
         description={canManage ? "Manage tenant agreements and occupancy." : "View your tenancy information."}
         action={canManage ? <button className="primary-button" onClick={() => { setEditing(null); setForm({tenant:"",apartment:"",startDate:"",endDate:"",rentAmount:""}); setShowForm(true); }}>Create Tenancy</button> : null}
       />

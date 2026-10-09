@@ -26,6 +26,11 @@ export const getUsers = async () => {
   return api.get("/api/users");
 };
 
+// Verified tenants (manager/admin), used when creating a tenancy
+export const getTenants = async () => {
+  return api.get("/api/users/tenants");
+};
+
 export const getUserById = async (id) => {
   return api.get(`/api/users/${id}`);
 };
