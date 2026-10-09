@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import PageHeader from "../components/common/PageHeader";
 import Modal from "../components/common/Modal";
+import { useAuth } from "../context/AuthContext";
 import {
   getUsers,
   updateUser,
@@ -8,34 +9,51 @@ import {
 } from "../services/userService";
 
 const Users = () => {
+  const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name:"", email:"", role:"tenant" });
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  // Bumped after a save or delete to fetch the list again
+  const [reloadKey, setReloadKey] = useState(0);
 
-  const load = async () => {
-    try {
-      setLoading(true);
-      const response = await getUsers();
-      setUsers(response.data?.users || []);
-      setError("");
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to load users.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const currentUserId = user?._id || user?.id;
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const response = await getUsers();
+        if (cancelled) return;
+        setUsers(response.data?.users || []);
+        setError("");
+      } catch (err) {
+        if (!cancelled) setError(err.response?.data?.message || "Failed to load users.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+
+    return () => { cancelled = true; };
+  }, [reloadKey]);
+
+  const reload = () => setReloadKey((key) => key + 1);
+
+  const isAdmin = editing?.role === "admin";
 
   const save = async (e) => {
     e.preventDefault();
     try {
-      await updateUser(editing._id, form);
+      // Admin roles can't be changed here, so never send a role for an admin
+      const data = isAdmin ? { name: form.name, email: form.email } : form;
+      await updateUser(editing._id, data);
       setShowForm(false);
-      await load();
+      reload();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update user.");
     }
@@ -45,7 +63,7 @@ const Users = () => {
     if (!window.confirm("Delete this user?")) return;
     try {
       await deleteUser(id);
-      await load();
+      reload();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to delete user.");
     }
@@ -65,8 +83,10 @@ const Users = () => {
                 <td><span className="status-badge">{u.role}</span></td>
                 <td>{u.isEmailVerified ? "Yes" : "No"}</td>
                 <td className="actions">
-                  <button className="secondary-button" onClick={() => { setEditing(u); setForm({name:u.name,email:u.email,role:u.role === "admin" ? "tenant" : u.role}); setShowForm(true); }}>Edit</button>
-                  <button className="danger-button" onClick={() => remove(u._id)}>Delete</button>
+                  <button className="secondary-button" onClick={() => { setEditing(u); setForm({name:u.name,email:u.email,role:u.role}); setShowForm(true); }}>Edit</button>
+                  {u._id !== currentUserId && (
+                    <button className="danger-button" onClick={() => remove(u._id)}>Delete</button>
+                  )}
                 </td>
               </tr>
             ))}</tbody>
@@ -78,7 +98,11 @@ const Users = () => {
         <form className="form-grid" onSubmit={save}>
           <label>Name<input required value={form.name} onChange={(e) => setForm({...form,name:e.target.value})} /></label>
           <label>Email<input type="email" required value={form.email} onChange={(e) => setForm({...form,email:e.target.value})} /></label>
-          <label>Role<select value={form.role} onChange={(e) => setForm({...form,role:e.target.value})}><option value="tenant">Tenant</option><option value="manager">Manager</option></select></label>
+          {isAdmin ? (
+            <div className="form-info full">Role: <strong>admin</strong> (admin roles can't be changed here)</div>
+          ) : (
+            <label>Role<select value={form.role} onChange={(e) => setForm({...form,role:e.target.value})}><option value="tenant">Tenant</option><option value="manager">Manager</option></select></label>
+          )}
           <div className="form-actions full"><button type="button" className="secondary-button" onClick={() => setShowForm(false)}>Cancel</button><button className="primary-button">Save Changes</button></div>
         </form>
       </Modal>}

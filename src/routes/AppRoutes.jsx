@@ -15,6 +15,10 @@ import ResetPassword from "../pages/auth/ResetPassword";
 // Dashboard
 import Dashboard from "../pages/Dashboard";
 
+// Public pages
+import PublicHome from "../pages/PublicHome";
+import PublicProperty from "../pages/PublicProperty";
+
 // Other pages
 import Properties from "../pages/Properties";
 import PropertyDetails from "../pages/PropertyDetails";
@@ -42,18 +46,13 @@ const AppRoutes = () => {
         {/* PUBLIC */}
 
         <Route
-          path="/properties"
-          element={<Properties />}
+          path="/"
+          element={<PublicHome />}
         />
 
         <Route
-          path="/properties/:id"
-          element={<PropertyDetails />}
-        />
-
-        <Route
-          path="/apartments/:id"
-          element={<ApartmentDetails />}
+          path="/property/:id"
+          element={<PublicProperty />}
         />
 
         {/* PUBLIC(AUTH) ROUTES*/}
@@ -100,10 +99,20 @@ const AppRoutes = () => {
               element={<Properties />}
             />
 
+            <Route
+              path="/properties/:id"
+              element={<PropertyDetails />}
+            />
+
             {/* Apartments */}
             <Route
               path="/apartments"
               element={<Apartments />}
+            />
+
+            <Route
+              path="/apartments/:id"
+              element={<ApartmentDetails />}
             />
 
             {/* Tenancy */}

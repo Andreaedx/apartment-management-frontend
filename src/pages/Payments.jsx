@@ -14,25 +14,38 @@ const Payments = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  // Bumped after a payment to fetch the list again
+  const [reloadKey, setReloadKey] = useState(0);
 
-  const load = async () => {
-    try {
-      setLoading(true);
-      const [paymentResponse, invoiceResponse] = await Promise.all([
-        getPayments(),
-        getInvoices(),
-      ]);
-      setPayments(paymentResponse.data?.data || []);
-      setInvoices(invoiceResponse.data?.data || []);
-      setError("");
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to load payments.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Only tenants can pay; managers can view payments for their properties
+  const canPay = user?.role === "tenant";
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const [paymentResponse, invoiceResponse] = await Promise.all([
+          getPayments(),
+          getInvoices(),
+        ]);
+        if (cancelled) return;
+        setPayments(paymentResponse.data?.data || []);
+        setInvoices(invoiceResponse.data?.data || []);
+        setError("");
+      } catch (err) {
+        if (!cancelled) setError(err.response?.data?.message || "Failed to load payments.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+
+    return () => { cancelled = true; };
+  }, [reloadKey]);
+
+  const reload = () => setReloadKey((key) => key + 1);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -41,7 +54,7 @@ const Payments = () => {
       await createPayment({ invoice: form.invoice, amount: Number(form.amount) });
       setShowForm(false);
       setForm({ invoice:"", amount:"" });
-      await load();
+      reload();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create payment.");
     } finally {
@@ -53,7 +66,11 @@ const Payments = () => {
 
   return (
     <div className="content-page">
-      <PageHeader title="Payments" description="View recorded payments and make payments against invoices." action={<button className="primary-button" onClick={() => setShowForm(true)}>Record Payment</button>} />
+      <PageHeader
+        title="Payments"
+        description={canPay ? "View your payments and pay your invoices." : "View payments made against invoices."}
+        action={canPay ? <button className="primary-button" onClick={() => setShowForm(true)}>Make Payment</button> : null}
+      />
       {error && <div className="alert error">{error}</div>}
       {loading ? <div className="page-state">Loading payments...</div> : (
         <div className="data-card">
@@ -74,12 +91,12 @@ const Payments = () => {
         </div>
       )}
 
-      {showForm && <Modal title="Record Payment" onClose={() => setShowForm(false)}>
+      {showForm && <Modal title="Make Payment" onClose={() => setShowForm(false)}>
         <form className="form-grid" onSubmit={submit}>
           <label className="full">Invoice<select required value={form.invoice} onChange={(e) => setForm({...form, invoice:e.target.value})}><option value="">Select invoice</option>{invoices.filter((i) => i.status !== "PAID").map((i) => <option key={i._id} value={i._id}>{i.tenancy?.tenant?.name || "Tenant"} — ₦{Number(i.amount).toLocaleString()}</option>)}</select></label>
           {selectedInvoice && <div className="form-info full">Invoice amount: ₦{Number(selectedInvoice.amount).toLocaleString()}</div>}
           <label className="full">Amount<input type="number" min="1" required value={form.amount} onChange={(e) => setForm({...form, amount:e.target.value})} /></label>
-          <div className="form-actions full"><button type="button" className="secondary-button" onClick={() => setShowForm(false)}>Cancel</button><button className="primary-button" disabled={saving}>{saving ? "Processing..." : "Record Payment"}</button></div>
+          <div className="form-actions full"><button type="button" className="secondary-button" onClick={() => setShowForm(false)}>Cancel</button><button className="primary-button" disabled={saving}>{saving ? "Processing..." : "Pay"}</button></div>
         </form>
       </Modal>}
     </div>

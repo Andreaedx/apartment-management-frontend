@@ -29,31 +29,47 @@ const Apartments = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  // Bumped after a save or delete to fetch the list again
+  const [reloadKey, setReloadKey] = useState(0);
 
   const canManage = user?.role === "manager";
+  const userId = user?._id || user?.id;
 
-  const load = async () => {
-    try {
-      setLoading(true);
-      const [apartmentsResponse, propertiesResponse] = await Promise.all([
-        getApartments(),
-        getProperties(),
-      ]);
-      setApartments(apartmentsResponse.data?.data || []);
-      setProperties(propertiesResponse.data?.data?.properties || []);
-      setError("");
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to load apartments.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Managers can only add apartments to properties they manage
+  const ownProperties = properties.filter(
+    (p) => (p.manager?._id || p.manager) === userId
+  );
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const [apartmentsResponse, propertiesResponse] = await Promise.all([
+          getApartments(),
+          getProperties(),
+        ]);
+        if (cancelled) return;
+        setApartments(apartmentsResponse.data?.data || []);
+        setProperties(propertiesResponse.data?.data?.properties || []);
+        setError("");
+      } catch (err) {
+        if (!cancelled) setError(err.response?.data?.message || "Failed to load apartments.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+
+    return () => { cancelled = true; };
+  }, [reloadKey]);
+
+  const reload = () => setReloadKey((key) => key + 1);
 
   const openCreate = () => {
     setEditing(null);
-    setForm({...emptyForm, property: properties[0]?._id || ""});
+    setForm({...emptyForm, property: ownProperties[0]?._id || ""});
     setShowForm(true);
   };
 
@@ -83,17 +99,19 @@ const Apartments = () => {
           description: form.description,
         });
       } else {
-        const data = new FormData();
-        data.append("property", form.property);
-        data.append("apartmentNumber", form.apartmentNumber);
-        data.append("type", form.type);
-        data.append("rentAmount", form.rentAmount);
-        data.append("status", form.status);
-        data.append("description", form.description);
-        await createApartment(data);
+        // Sent as JSON (no images here) so rentAmount stays a number;
+        // FormData would turn it into text and the API rejects it
+        await createApartment({
+          property: form.property,
+          apartmentNumber: form.apartmentNumber,
+          type: form.type,
+          rentAmount: Number(form.rentAmount),
+          status: form.status,
+          description: form.description,
+        });
       }
       setShowForm(false);
-      await load();
+      reload();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to save apartment.");
     } finally {
@@ -105,7 +123,7 @@ const Apartments = () => {
     if (!window.confirm("Delete this apartment?")) return;
     try {
       await deleteApartment(id);
-      await load();
+      reload();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to delete apartment.");
     }
@@ -150,7 +168,7 @@ const Apartments = () => {
               <label>Property
                 <select required value={form.property} onChange={(e) => setForm({...form, property: e.target.value})}>
                   <option value="">Select property</option>
-                  {properties.map((p) => <option key={p._id} value={p._id}>{p.name}</option>)}
+                  {ownProperties.map((p) => <option key={p._id} value={p._id}>{p.name}</option>)}
                 </select>
               </label>
             )}

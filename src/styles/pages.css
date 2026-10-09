@@ -11,7 +11,7 @@
 .data-table tr:last-child td { border-bottom:none; }
 .actions { display:flex; gap:8px; flex-wrap:wrap; }
 .primary-button,.secondary-button,.danger-button,.icon-button { border:1px solid var(--border); border-radius:8px; padding:9px 13px; background:var(--bg); color:var(--text-h); }
-.primary-button { background:var(--accent); border-color:var(--accent); color:#fff; }
+.primary-button { background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
 .danger-button { color:#dc2626; }
 .primary-button:disabled { opacity:.6; cursor:not-allowed; }
 .page-state { padding:40px; text-align:center; color:var(--text); }

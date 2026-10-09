@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import PageHeader from "../components/common/PageHeader";
 import Modal from "../components/common/Modal";
 import { useAuth } from "../context/AuthContext";
-import { getApartments } from "../services/apartmentService";
+import { getTenancies } from "../services/tenancyService";
 import {
   getMaintenanceRequests,
   createMaintenanceRequest,
@@ -22,25 +22,42 @@ const Maintenance = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  // Bumped after a save or status change to fetch the list again
+  const [reloadKey, setReloadKey] = useState(0);
 
-  const load = async () => {
-    try {
-      setLoading(true);
-      const response = await getMaintenanceRequests();
-      setRequests(response.data?.data || []);
-      if (canCreate) {
-        const apartmentResponse = await getApartments();
-        setApartments(apartmentResponse.data?.data || []);
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const response = await getMaintenanceRequests();
+        if (cancelled) return;
+        setRequests(response.data?.data || []);
+
+        // A tenant can only raise requests for apartments they currently rent
+        if (canCreate) {
+          const tenancyResponse = await getTenancies({ status: "ACTIVE" });
+          if (cancelled) return;
+          setApartments(
+            (tenancyResponse.data?.data || [])
+              .map((tenancy) => tenancy.apartment)
+              .filter(Boolean)
+          );
+        }
+        setError("");
+      } catch (err) {
+        if (!cancelled) setError(err.response?.data?.message || "Failed to load maintenance requests.");
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setError("");
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to load maintenance requests.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  useEffect(() => { load(); }, [canCreate]);
+    load();
+
+    return () => { cancelled = true; };
+  }, [canCreate, reloadKey]);
+
+  const reload = () => setReloadKey((key) => key + 1);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -57,7 +74,7 @@ const Maintenance = () => {
       }
       setShowForm(false);
       setEditing(null);
-      await load();
+      reload();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to save maintenance request.");
     } finally {
@@ -69,7 +86,7 @@ const Maintenance = () => {
     const next = request.status === "OPEN" ? "IN_PROGRESS" : "RESOLVED";
     try {
       await updateMaintenanceStatus(request._id, next);
-      await load();
+      reload();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update status.");
     }
@@ -104,7 +121,7 @@ const Maintenance = () => {
 
       {showForm && <Modal title={editing ? "Edit Request" : "New Maintenance Request"} onClose={() => setShowForm(false)}>
         <form className="form-grid" onSubmit={submit}>
-          {!editing && <label className="full">Apartment<select required value={form.apartment} onChange={(e) => setForm({...form, apartment:e.target.value})}><option value="">Select apartment</option>{apartments.filter((a) => a.status === "OCCUPIED").map((a) => <option key={a._id} value={a._id}>Apartment {a.apartmentNumber}</option>)}</select></label>}
+          {!editing && <label className="full">Apartment<select required value={form.apartment} onChange={(e) => setForm({...form, apartment:e.target.value})}><option value="">Select apartment</option>{apartments.map((a) => <option key={a._id} value={a._id}>Apartment {a.apartmentNumber}</option>)}</select></label>}
           <label className="full">Title<input required value={form.title} onChange={(e) => setForm({...form,title:e.target.value})} /></label>
           <label className="full">Description<textarea required rows="4" value={form.description} onChange={(e) => setForm({...form,description:e.target.value})} /></label>
           <label>Priority<select value={form.priority} onChange={(e) => setForm({...form,priority:e.target.value})}>{["LOW","MEDIUM","HIGH","URGENT"].map((p) => <option key={p}>{p}</option>)}</select></label>

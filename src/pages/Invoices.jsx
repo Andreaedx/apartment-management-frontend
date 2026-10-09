@@ -15,24 +15,35 @@ const Invoices = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  // Bumped after creating an invoice to fetch the list again
+  const [reloadKey, setReloadKey] = useState(0);
 
-  const load = async () => {
-    try {
-      setLoading(true);
-      const invoiceResponse = await getInvoices();
-      setInvoices(invoiceResponse.data?.data || []);
-      if (canCreate) {
-        const tenancyResponse = await getTenancies({ page: 1, limit: 100 });
-        setTenancies((tenancyResponse.data?.data || []).filter((t) => t.status === "ACTIVE"));
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const invoiceResponse = await getInvoices();
+        if (cancelled) return;
+        setInvoices(invoiceResponse.data?.data || []);
+        if (canCreate) {
+          const tenancyResponse = await getTenancies({ page: 1, limit: 100 });
+          if (cancelled) return;
+          setTenancies((tenancyResponse.data?.data || []).filter((t) => t.status === "ACTIVE"));
+        }
+      } catch (err) {
+        if (!cancelled) setError(err.response?.data?.message || "Failed to load invoices.");
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to load invoices.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  useEffect(() => { load(); }, [canCreate]);
+    load();
+
+    return () => { cancelled = true; };
+  }, [canCreate, reloadKey]);
+
+  const reload = () => setReloadKey((key) => key + 1);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -41,7 +52,7 @@ const Invoices = () => {
       await createInvoice({ tenancy: form.tenancy, amount: Number(form.amount), dueDate: form.dueDate });
       setShowForm(false);
       setForm({ tenancy:"", amount:"", dueDate:"" });
-      await load();
+      reload();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create invoice.");
     } finally {
