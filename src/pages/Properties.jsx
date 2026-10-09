@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Modal from "../components/common/Modal";
+import ImageFields from "../components/common/ImageFields";
 import { useAuth } from "../context/AuthContext";
 import {
   getProperties,
   createProperty,
   updateProperty,
   deleteProperty,
+  addPropertyImages,
+  deletePropertyImage,
 } from "../services/propertyService";
 import "./Properties.css";
 
@@ -26,6 +29,10 @@ const Properties = () => {
   const [editing, setEditing] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
+  // New image files chosen in the form, uploaded on save
+  const [files, setFiles] = useState([]);
+  // Errors from the form are shown inside the modal so they're visible
+  const [formError, setFormError] = useState("");
   // Bumped after a save or delete to fetch the list again
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -69,6 +76,8 @@ const Properties = () => {
   const openCreate = () => {
     setEditing(null);
     setForm(emptyForm);
+    setFiles([]);
+    setFormError("");
     setShowForm(true);
   };
 
@@ -80,7 +89,17 @@ const Properties = () => {
       city: property.city || "",
       description: property.description || "",
     });
+    setFiles([]);
+    setFormError("");
     setShowForm(true);
+  };
+
+  // Builds multipart data: the text fields (if any) plus the chosen images
+  const toFormData = (fields = {}) => {
+    const data = new FormData();
+    Object.entries(fields).forEach(([key, value]) => data.append(key, value));
+    files.forEach((file) => data.append("images", file));
+    return data;
   };
 
   const submit = async (event) => {
@@ -88,22 +107,42 @@ const Properties = () => {
 
     try {
       setSaving(true);
-      setError("");
+      setFormError("");
 
       if (editing) {
         await updateProperty(editing._id, form);
+        if (files.length > 0) {
+          await addPropertyImages(editing._id, toFormData());
+        }
       } else {
-        await createProperty(form);
+        await createProperty(files.length > 0 ? toFormData(form) : form);
       }
 
       setShowForm(false);
       reload();
     } catch (error) {
-      setError(
+      setFormError(
         error.response?.data?.message || "Failed to save property."
       );
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Removing a saved image takes effect immediately
+  const removeImage = async (imageId) => {
+    try {
+      setFormError("");
+      await deletePropertyImage(editing._id, imageId);
+      setEditing((current) => ({
+        ...current,
+        images: current.images.filter((image) => image._id !== imageId),
+      }));
+      reload();
+    } catch (error) {
+      setFormError(
+        error.response?.data?.message || "Failed to remove image."
+      );
     }
   };
 
@@ -214,6 +253,8 @@ const Properties = () => {
           onClose={() => setShowForm(false)}
         >
           <form className="form-grid" onSubmit={submit}>
+            {formError && <div className="alert error full">{formError}</div>}
+
             <label className="full">
               Name
               <input
@@ -249,6 +290,13 @@ const Properties = () => {
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
               />
             </label>
+
+            <ImageFields
+              existing={editing?.images || []}
+              onRemoveExisting={removeImage}
+              files={files}
+              onFilesChange={setFiles}
+            />
 
             <div className="form-actions full">
               <button

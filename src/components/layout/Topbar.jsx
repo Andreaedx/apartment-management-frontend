@@ -45,7 +45,11 @@ const Topbar = ({ onMenuClick }) => {
 
       <div className="dashboard-topbar-user">
         <div className="dashboard-user-avatar">
-          {user?.name?.charAt(0).toUpperCase()}
+          {user?.profilePicture?.url ? (
+            <img src={user.profilePicture.url} alt="" />
+          ) : (
+            user?.name?.charAt(0).toUpperCase()
+          )}
         </div>
 
         <div className="dashboard-user-info">

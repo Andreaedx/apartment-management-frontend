@@ -144,6 +144,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Merge updated profile fields (name, email, picture) into the logged-in user,
+  // so the top bar and other pages reflect changes without a reload
+  const updateUser = (changes) => {
+    setUser((current) => (current ? { ...current, ...changes } : current));
+  };
+
   const value = {
     user,
     token,
@@ -153,6 +159,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     refreshAuth,
+    updateUser,
   };
 
   return (

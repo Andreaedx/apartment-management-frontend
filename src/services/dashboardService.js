@@ -140,7 +140,7 @@ const getMaintenanceStats = (requests) => {
 /**
  * Get complete dashboard data
  */
-export const getDashboardData = async (role) => {
+export const getDashboardData = async (role, userId) => {
   /*
    * APARTMENTS
    *
@@ -234,8 +234,16 @@ export const getDashboardData = async (role) => {
     getMaintenanceRequests(),
   ]);
 
-  const properties =
+  const allProperties =
     propertyResponse.data?.data?.properties || [];
+
+  // The property list is public, so a manager's stats only count their own
+  const properties =
+    role === "manager"
+      ? allProperties.filter(
+          (property) => (property.manager?._id || property.manager) === userId
+        )
+      : allProperties;
 
   const tenancies =
     tenancyResponse.data?.data || [];
@@ -264,8 +272,10 @@ export const getDashboardData = async (role) => {
 
     propertyStats: {
       total:
-        propertyResponse.data?.data?.pagination?.total ||
-        properties.length,
+        role === "manager"
+          ? properties.length
+          : propertyResponse.data?.data?.pagination?.total ||
+            properties.length,
     },
 
     tenancies,

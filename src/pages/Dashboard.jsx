@@ -67,7 +67,7 @@ const Dashboard = () => {
         setLoading(true);
         setError("");
 
-        const data = await getDashboardData(user?.role);
+        const data = await getDashboardData(user?.role, user?._id || user?.id);
 
         setDashboard(data);
       } catch (error) {
@@ -83,7 +83,7 @@ const Dashboard = () => {
     if (user?.role) {
       loadDashboard();
     }
-  }, [user?.role]);
+  }, [user?.role, user?._id, user?.id]);
 
   if (loading) {
     return (
