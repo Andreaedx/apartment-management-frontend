@@ -75,9 +75,17 @@
 
 .public-hero h1 {
   margin: 14px 0;
+  /* The global h1 colour is near-black; keep the headline readable on the dark photo */
+  color: #ffffff;
   font-size: clamp(42px, 6vw, 72px);
   line-height: 1;
   letter-spacing: -2px;
+}
+
+/* Light button so it stands out on the dark hero */
+.public-hero .hero-button {
+  background: #ffffff;
+  color: #0f172a;
 }
 
 .public-hero p {

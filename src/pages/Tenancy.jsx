@@ -106,7 +106,7 @@ const Tenancy = () => {
   return (
     <div className="content-page">
       <PageHeader
-        title="Tenancy"
+        title={canManage ? "Tenancies" : "Tenancy"}
         description={canManage ? "Manage tenant agreements and occupancy." : "View your tenancy information."}
         action={canManage ? <button className="primary-button" onClick={() => { setEditing(null); setForm({tenant:"",apartment:"",startDate:"",endDate:"",rentAmount:""}); setShowForm(true); }}>Create Tenancy</button> : null}
       />
