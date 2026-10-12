@@ -15,6 +15,8 @@ const Login = () => {
   });
 
   const [error, setError] = useState("");
+  // Set when the account exists but its email isn't verified yet
+  const [needsVerification, setNeedsVerification] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -29,6 +31,7 @@ const Login = () => {
     event.preventDefault();
 
     setError("");
+    setNeedsVerification(false);
 
     try {
       await login(
@@ -43,6 +46,10 @@ const Login = () => {
         "Unable to login. Please try again.";
 
       setError(message);
+      // The API answers 403 when the password is right but the email isn't verified
+      setNeedsVerification(
+        error.response?.status === 403 && /verify/i.test(message)
+      );
     }
   };
 
@@ -54,6 +61,16 @@ const Login = () => {
       {error && (
         <p className="auth-alert auth-alert-error" role="alert">
           {error}
+          {needsVerification && (
+            <>
+              {" "}
+              <Link
+                to={`/verify-email?email=${encodeURIComponent(formData.email)}`}
+              >
+                Verify your email
+              </Link>
+            </>
+          )}
         </p>
       )}
 

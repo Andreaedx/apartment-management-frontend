@@ -68,8 +68,14 @@ const AppRoutes = () => {
         />
 
         <Route
-          path="/verify-email/:token"
+          path="/verify-email"
           element={<VerifyEmail />}
+        />
+
+        {/* Older emails linked to /verify-email/<token>; verification now uses a code */}
+        <Route
+          path="/verify-email/:token"
+          element={<Navigate to="/verify-email" replace />}
         />
 
         <Route

@@ -453,3 +453,37 @@
     animation-duration: 2.4s;
   }
 }
+/* Verification code entry */
+.auth-code-input {
+  font-family: var(--mono);
+  font-size: 22px !important;
+  letter-spacing: 0.4em;
+  text-align: center;
+}
+
+/* Text-style button, e.g. Resend code */
+.auth-link-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-link-button:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.auth-link-button:disabled {
+  color: var(--text);
+  cursor: not-allowed;
+}
+
+/* Links inside alerts, e.g. "Verify your email" after a blocked login */
+.auth-alert a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+}
