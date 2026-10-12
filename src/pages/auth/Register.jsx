@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { register } from "../../services/authService";
 import AuthLayout from "../../components/layout/AuthLayout";
 import "./Auth.css";
 
 const Register = () => {
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -64,18 +65,14 @@ const Register = () => {
         accountType: formData.accountType,
       });
 
-      setMessage(
-        response.data?.message ||
-          "Registration successful. Please check your email to verify your account."
-      );
-
-      // Clear the form
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-        accountType: "tenant",
+      // Next step is entering the emailed code, so go straight to that page
+      const email = response.data?.email || formData.email;
+      navigate(`/verify-email?email=${encodeURIComponent(email)}`, {
+        state: {
+          notice:
+            response.data?.message ||
+            "Registration successful. A verification code has been sent to your email.",
+        },
       });
     } catch (error) {
       const errorMessage =

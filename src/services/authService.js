@@ -4,8 +4,13 @@ export const register = async (data) => {
   return api.post("/api/auth/register", data);
 };
 
-export const verifyEmail = async (token) => {
-  return api.get(`/api/auth/verify-email/${token}`);
+// Verify with the 6-digit code from the registration email
+export const verifyEmail = async (email, code) => {
+  return api.post("/api/auth/verify-email", { email, code });
+};
+
+export const resendVerification = async (email) => {
+  return api.post("/api/auth/resend-verification", { email });
 };
 
 export const login = async (data) => {
